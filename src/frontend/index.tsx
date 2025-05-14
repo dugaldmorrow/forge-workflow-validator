@@ -11,7 +11,6 @@ import ForgeReconciler, {
   Stack,
   Text,
 } from '@forge/react';
-// import { events } from "@forge/bridge";
 import { invoke } from '@forge/bridge';
 import { ValidationResult } from 'src/types/ValidationResult';
 import { UserReference } from 'src/types/UserReference';
@@ -41,15 +40,6 @@ const App = () => {
     await Promise.all(promises);
   }
 
-  // events.on("JIRA_ISSUE_CHANGED", (data) => {
-  //   console.log("JIRA_ISSUE_CHANGED (Forge)", data);
-  //   if (Date.now() - lastUpdateTime > 1000) {
-  //     retrieveData();
-  //   } else {
-  //     console.log("Skipping update, last update was too recent.");
-  //   }
-  // });
-  
   useEffect(() => {
     retrieveData();
   }, []);

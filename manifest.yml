@@ -1,0 +1,34 @@
+modules:
+  jira:issuePanel:
+    - key: feature-completion-panel
+      resource: completion-panel
+      resolver:
+        function: myResolver
+      render: native
+      title: Completion requirements
+      icon: https://developer.atlassian.com/platform/forge/images/icons/issue-panel-icon.svg
+      displayConditions:
+        and:
+          projectKey: FEAT
+          jiraExpression: issue.status.name != "Resolved"
+  jira:workflowValidator:
+    - key: feature-completed-workflow-validator
+      function: my-validator
+      name: My Feature Completion Enforcer
+      description: This Jira workflow validator ensures features are properly completed.
+  function:
+    - key: my-validator
+      handler: FeatureCompletionEnforcer.checkFeatureCompletion
+    - key: myResolver
+      handler: myResolver.handler
+resources:
+  - key: completion-panel
+    path: src/frontend/index.tsx
+app:
+  runtime:
+    name: nodejs22.x
+  id: ari:cloud:ecosystem::app/916486f8-5387-429e-917b-b66b25300a11
+permissions:
+  scopes:
+    - read:jira-work
+    - read:email-address:jira

@@ -10,7 +10,10 @@ import { fetchTestCases } from "./fetchTestCases";
 import { fetchIssue } from "./fetchIssue";
 import { inProgressWorkflowStateId, resolvedWorkflowStateId } from "./config";
 
-
+/**
+ * The Forge platform invokes this function when a user attempts to transition an issue. See the jira:workflowValidator module
+ * and associated function in the manifest.yml file.
+ */
 export const checkFeatureCompletion = async (issueTransition: IssueTransition): Promise<ValidationResult> => {
   const issueReference = issueTransition.issue;
   const transition = issueTransition.transition;
@@ -33,7 +36,6 @@ export const checkFeatureCompletion = async (issueTransition: IssueTransition): 
       .setValidity(true)
       .build();
   }
-
 }
 
 export const allowIssueToBeResolved = async (

@@ -5,6 +5,8 @@ import { fetchUsersAuthorizedToCompleteFeature } from './authorizationUtil';
 import { fetchTestCaseStats } from './fetchTestCaseStats';
 import { IssueReference } from './types/IssueReference';
 
+// The following "resolver" functions are invoked from the client-side Forge UI.
+
 const resolver = new Resolver();
 
 resolver.define('getCompletionValidationInfo', async (req) => {

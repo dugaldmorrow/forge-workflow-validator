@@ -1,9 +1,20 @@
 modules:
+  trigger:
+    - key: on-issue-change
+      function: fn-on-issue-change
+      events:
+        - avi:jira:created:issue
+        - avi:jira:updated:issue
+        - avi:jira:deleted:issue
+      filter:
+        ignoreSelf: true
+        expression: event.issue.fields?.project?.key == 'FT'
+        onError: RECEIVE_AND_LOG
   jira:issuePanel:
     - key: feature-completion-panel
       resource: completion-panel
       resolver:
-        function: myResolver
+        function: fn-resolver
       render: native
       title: Completion requirements
       icon: https://developer.atlassian.com/platform/forge/images/icons/issue-panel-icon.svg
@@ -17,10 +28,12 @@ modules:
       name: My Feature Completion Enforcer
       description: This Jira workflow validator ensures features are properly completed.
   function:
+    - key: fn-on-issue-change
+      handler: trigger.onIssueChanged
     - key: my-validator
       handler: FeatureCompletionEnforcer.checkFeatureCompletion
-    - key: myResolver
-      handler: myResolver.handler
+    - key: fn-resolver
+      handler: resolver.handler
 resources:
   - key: completion-panel
     path: src/frontend/index.tsx
@@ -32,3 +45,4 @@ permissions:
   scopes:
     - read:jira-work
     - read:email-address:jira
+    - write:jira-work

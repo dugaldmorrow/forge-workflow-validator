@@ -1,8 +1,14 @@
 import { fetchIssue } from "./fetchIssue";
 import { fetchTestCases } from "./fetchTestCases";
+import { Issue } from "./types/Issue";
 import { TestCaseStats } from "./types/TestCaseStats";
 
-export const fetchTestCaseStats = async (issueKey: string): Promise<TestCaseStats> => {
+export const fetchTestCaseStatsByIssueKey = async (issueKey: string): Promise<TestCaseStats> => {
+  const issue = await fetchIssue(issueKey);
+  return await fetchTestCaseStatsByIssue(issue);
+}
+
+export const fetchTestCaseStatsByIssue = async (issue: Issue): Promise<TestCaseStats> => {
   const stats: TestCaseStats = {
     totalPass: 0,
     totalFailed: 0,
@@ -16,7 +22,6 @@ export const fetchTestCaseStats = async (issueKey: string): Promise<TestCaseStat
     totalNa: 0,
     totalOthers: 0,
   }
-  const issue = await fetchIssue(issueKey);
   const testCases = fetchTestCases(issue);
   for (const testCase of testCases) {
     if (testCase.fields.status.name === 'Pass') {

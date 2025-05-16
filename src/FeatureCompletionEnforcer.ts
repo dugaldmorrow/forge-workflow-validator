@@ -9,6 +9,7 @@ import { isUserInAllowList } from "./authorizationUtil";
 import { fetchTestCases } from "./fetchTestCases";
 import { fetchIssue } from "./fetchIssue";
 import { inProgressWorkflowStateId, resolvedWorkflowStateId } from "./config";
+import { updateComplianceField } from "./updateComplianceField";
 
 /**
  * The Forge platform invokes this function when a user attempts to transition an issue. See the jira:workflowValidator module
@@ -22,6 +23,7 @@ export const checkFeatureCompletion = async (issueTransition: IssueTransition): 
   console.log(` * from: ${JSON.stringify(from)}`);
   console.log(` * to: ${JSON.stringify(to)}`);
   // console.log(` * issueTransition: ${JSON.stringify(issueTransition, null, 2)}`);
+
 
   const isTransitionFromInProgressToResolved = from.id === inProgressWorkflowStateId && to.id === resolvedWorkflowStateId; 
   if (isTransitionFromInProgressToResolved) {
@@ -42,6 +44,7 @@ export const allowIssueToBeResolved = async (
     issueReference: IssueReference,
     accountId: string): Promise<ValidationResult> => {
   const issue = await fetchIssue(issueReference.key);
+  // console.log(` * issue to be transitioned: ${JSON.stringify(issue, null, 2)}`);
   if (issue) {
     const testIssueValidation = validateTestIssueHavePassed(issue);
     if (testIssueValidation.result) {
@@ -100,12 +103,12 @@ const validateTestIssueHavePassed = (issue: Issue): ValidationResult => {
       .build();
    } else {
      console.log(`Found related feature test issues: ${JSON.stringify(featureTestIssues)}`);
-     const unsatisfiedFeatureTestIssueCount = featureTestIssues.filter((issueLink: IssueLinkInfo) => {
+     const unsatisfiedFeatureTestIssues: IssueLinkInfo[] = featureTestIssues.filter((issueLink: IssueLinkInfo) => {
         console.log(`Checking the status of issue ${issueLink.key}: ${issueLink.fields.status.name}`);
         return issueLink.fields.status.name !== 'Pass';
      });
-     console.log(` * unsatisfiedFeatureTestIssueCount.length = ${unsatisfiedFeatureTestIssueCount.length}`);
-     if (unsatisfiedFeatureTestIssueCount.length > 0) {
+     console.log(` * unsatisfiedFeatureTestIssueCount.length = ${unsatisfiedFeatureTestIssues.length}`);
+     if (unsatisfiedFeatureTestIssues.length > 0) {
        return new ValidationResultBuilder()
          .setValidity(false)
          .setErrorMessage(`No feature test issues are marked as Done for issue ${issue.key}.`)

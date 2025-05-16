@@ -2,7 +2,7 @@ import Resolver from '@forge/resolver';
 import { allowIssueToBeResolved } from './FeatureCompletionEnforcer';
 import { TestCaseStats } from './types/TestCaseStats';
 import { fetchUsersAuthorizedToCompleteFeature } from './authorizationUtil';
-import { fetchTestCaseStats } from './fetchTestCaseStats';
+import { fetchTestCaseStatsByIssueKey } from './fetchTestCaseStats';
 import { IssueReference } from './types/IssueReference';
 
 // The following "resolver" functions are invoked from the client-side Forge UI.
@@ -26,7 +26,7 @@ resolver.define('getUsersWhoCanComplete', async (req) => {
 
 resolver.define('getTestCaseStats', async (req) => {
   // console.log(req);
-  const stats: TestCaseStats = await fetchTestCaseStats(req.context.extension.issue.key);
+  const stats: TestCaseStats = await fetchTestCaseStatsByIssueKey(req.context.extension.issue.key);
   return stats;
 });
 

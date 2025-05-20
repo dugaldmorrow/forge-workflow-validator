@@ -47,9 +47,9 @@ const buildComplianceAdf = (issue: Issue, stats: TestCaseStats, users: UserRefer
   const panelType: PanelType = unsatisfiedFeatureTestIssues.length > 0 ? "error" : "success";
   const mainMessageNodes: any[] = [];
   if (unsatisfiedFeatureTestIssues.length > 0) {
-    mainMessageNodes.push(buildParagraphNodeAdf(`You are not able to complete this feature - see below for authorization details.`));
+    mainMessageNodes.push(buildParagraphNodeAdf(`This feature can not be completed yet as there is one or more unsatisfied test cases:`));
   } else {
-    mainMessageNodes.push(buildParagraphNodeAdf(`You are able to complete this feature.`));
+    mainMessageNodes.push(buildParagraphNodeAdf(`This feature can be completed since all test cases have been satisfied. Note, however, that only certain people are authorized to complete this feature.`));
   }
   const mainContentNodes: any[] = [];
   if (utiliseExpands) {

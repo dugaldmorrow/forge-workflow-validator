@@ -3,10 +3,10 @@ import { fetchIssue } from "./fetchIssue";
 import { IssueLinkInfo } from "./types/IssueLink";
 import { updateComplianceField } from "./updateComplianceField";
 
-export const onIssueChanged = async (event: any, request: any) => {
-  console.log(`In trigger.onIssueChanged:: ${JSON.stringify(request, null, 2)}`);
-  // console.log(`context: ${JSON.stringify(context, null, 2)}`);
-  // console.log(`event: ${JSON.stringify(event, null, 2)}`);
+export const onIssueChanged = async (event: any, context: any) => {
+  console.log(`In trigger.onIssueChanged:`);
+  console.log(`event: ${JSON.stringify(event, null, 2)}`);
+  console.log(`context: ${JSON.stringify(context, null, 2)}`);
   const featureTestIssueKey = event.issue.key;
   console.log(`Issue Key: ${featureTestIssueKey}`);
 

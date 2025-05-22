@@ -12,6 +12,7 @@ export const onFetchDfdsData = async ({ context }) => {
   console.log(`context: ${JSON.stringify(context, null, 2)}`);
 
   // https://developer.atlassian.com/platform/forge/runtime-reference/fetch-api.basic/
+  // https://glitch.com/edit/#!/dfds-mock?path=server.js%3A1%3A0
   const dfdsResponse = await fetch("https://dfds-mock.glitch.me/getRecord");
   if ((dfdsResponse).ok) {
     const dfdsData = await dfdsResponse.json();

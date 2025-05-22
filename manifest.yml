@@ -1,4 +1,9 @@
 modules:
+  # https://developer.atlassian.com/platform/forge/manifest-reference/modules/scheduled-trigger/
+  scheduledTrigger:
+    - key: fetch-dfds-trigger
+      function: fn-fetch-dfds
+      interval: fiveMinute
   trigger:
     - key: on-issue-change
       function: fn-on-issue-change
@@ -28,6 +33,8 @@ modules:
       name: My Feature Completion Enforcer
       description: This Jira workflow validator ensures features are properly completed.
   function:
+    - key: fn-fetch-dfds
+      handler: trigger.onFetchDfdsData
     - key: fn-on-issue-change
       handler: trigger.onIssueChanged
     - key: my-validator
@@ -42,6 +49,10 @@ app:
     name: nodejs22.x
   id: ari:cloud:ecosystem::app/916486f8-5387-429e-917b-b66b25300a11
 permissions:
+  external:
+    fetch:
+      backend:
+        - '*.glitch.me'
   scopes:
     - read:jira-work
     - read:email-address:jira

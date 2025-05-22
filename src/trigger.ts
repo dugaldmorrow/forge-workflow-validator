@@ -1,7 +1,26 @@
+import { fetch } from '@forge/api';
 import { featureProjectKey } from "./config";
 import { fetchIssue } from "./fetchIssue";
 import { IssueLinkInfo } from "./types/IssueLink";
 import { updateComplianceField } from "./updateComplianceField";
+
+// https://developer.atlassian.com/platform/forge/events-reference/scheduled-trigger/
+// https://developer.atlassian.com/platform/forge/manifest-reference/modules/scheduled-trigger/
+export const onFetchDfdsData = async ({ context }) => {
+  console.log(`In trigger.onFetchDfdsData:`);
+  // console.log(`event: ${JSON.stringify(event, null, 2)}`);
+  console.log(`context: ${JSON.stringify(context, null, 2)}`);
+
+  // https://developer.atlassian.com/platform/forge/runtime-reference/fetch-api.basic/
+  const dfdsResponse = await fetch("https://dfds-mock.glitch.me/getRecord");
+  if ((dfdsResponse).ok) {
+    const dfdsData = await dfdsResponse.json();
+    console.log(`DFDS data fetched successfully: ${JSON.stringify(dfdsData, null, 2)}`);
+  } else {
+    const responseText = await dfdsResponse.text();
+    console.error(`Error fetching DFDS data: ${dfdsResponse.status}: ${responseText}`);
+  }
+}
 
 export const onIssueChanged = async (event: any, context: any) => {
   console.log(`In trigger.onIssueChanged:`);

@@ -14,7 +14,11 @@ The app must prevent CAP transitions from "In Progress" to "Resolved" if the cur
 
 ## Architecture
 
-See ![images/architecture.png](images/architecture.png)
+![images/architecture.png](images/architecture.png)
+
+
+![images/sequence-sharing-logic.png](images/sequence-sharing-logic.png)
+
 
 ## Configuration and assumptions
 

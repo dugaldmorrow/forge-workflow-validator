@@ -1,37 +1,15 @@
 import Resolver from '@forge/resolver';
-// import { allowIssueToBeResolved } from './FeatureCompletionEnforcer';
-// import { TestCaseStats } from './types/TestCaseStats';
-// import { fetchUsersAuthorizedToCompleteFeature } from './authorizationUtil';
-// import { fetchTestCaseStatsByIssueKey } from './fetchTestCaseStats';
-// import { IssueReference } from './types/IssueReference';
-
-// The following "resolver" functions are invoked from the client-side Forge UI.
+import backendNoUserContextApiAdaptor from './backendNoUserContextApiAdaptor';
 
 const resolver = new Resolver();
 
-// Removing all resolvers since we have a strategy to retrieve the data from the client side directly. See the
-// comment in capabilityDAO.ts.
-
-
-// resolver.define('getCompletionValidationInfo', async (req) => {
-//   // console.log(req);
-//   const issueReference: IssueReference = {
-//     key: req.context.extension.issue.key,
-//   };
-//   const validationResult = await allowIssueToBeResolved(issueReference, req.context.accountId);
-//   return validationResult;
-// });
-
-// resolver.define('getUsersWhoCanComplete', async (req) => {
-//   // console.log(req);
-//   const users = await fetchUsersAuthorizedToCompleteFeature(req.context.extension.issue.key);
-//   return users;
-// });
-
-// resolver.define('getTestCaseStats', async (req) => {
-//   // console.log(req);
-//   const stats: TestCaseStats = await fetchTestCaseStatsByIssueKey(req.context.extension.issue.key);
-//   return stats;
-// });
+// The /rest/api/3/user/email?accountId={accountId} API can only be called by the app (api.asApp()) so
+// the call must be made from the backend.
+resolver.define('getUserReference', async (req) => {
+  console.log(`Resolver.getUserReference: ${JSON.stringify(req, null, 2)}`);
+  const payload = req.payload;
+  const accountId = payload.accountId;
+  return await backendNoUserContextApiAdaptor.getUserReference(accountId);
+});
 
 export const handler = resolver.getDefinitions();

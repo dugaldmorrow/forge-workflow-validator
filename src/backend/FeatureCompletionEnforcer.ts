@@ -13,9 +13,9 @@ export const checkFeatureCompletion = async (issueTransition: IssueTransition): 
   const issueReference = issueTransition.issue;
   const transition = issueTransition.transition;
   const { from, to } = transition; // Destructure from transition
-  console.log(`In checkFeatureCompletion: ${issueReference.key} from ${from.id} to ${to.id}`); // Use issueReference instead of issue
-  console.log(` * from: ${JSON.stringify(from)}`);
-  console.log(` * to: ${JSON.stringify(to)}`);
+  // console.log(`In checkFeatureCompletion: ${issueReference.key} from ${from.id} to ${to.id}`); // Use issueReference instead of issue
+  // console.log(` * from: ${JSON.stringify(from)}`);
+  // console.log(` * to: ${JSON.stringify(to)}`);
   // console.log(` * issueTransition: ${JSON.stringify(issueTransition, null, 2)}`);
 
   const inProgressWorkflowStateId = getInProgressWorkflowStateId();
@@ -23,7 +23,7 @@ export const checkFeatureCompletion = async (issueTransition: IssueTransition): 
 
   const isTransitionFromInProgressToResolved = from.id === inProgressWorkflowStateId && to.id === resolvedWorkflowStateId; 
   if (isTransitionFromInProgressToResolved) {
-    const capabilityUtil = new CapabilityUtil(backendNoUserContextApiAdaptor);
+    const capabilityUtil = new CapabilityUtil(backendNoUserContextApiAdaptor, backendNoUserContextApiAdaptor);
     const result = await capabilityUtil.allowIssueToBeResolved(issueReference, issueTransition.user.accountId);
     if (!result.result) {
       const messageToAppend = `Expand the Completion requirements issue panel for details.`

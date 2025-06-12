@@ -6,14 +6,17 @@ import { fetchIssue, getCurrentUser, getSelfAssessmentData } from "./capabilityD
 import { AuthorizationUtil } from "./AuthorizationUtil";
 import { Issue } from "../types/Issue";
 import { selfAssessmentDoneStatusName } from "./sharedConfig";
+import { BackendApiAdaptor } from "./BackendApiAdaptor";
 
 export class CapabilityUtil {
 
   apiAdaptor: ApiAdaptor;
+  backendApiAdaptor: BackendApiAdaptor;
   authorizationUtil: AuthorizationUtil;
 
-  constructor(apiAdaptor: ApiAdaptor) {
+  constructor(apiAdaptor: ApiAdaptor, backendApiAdaptor: BackendApiAdaptor) {
     this.apiAdaptor = apiAdaptor;
+    this.backendApiAdaptor = backendApiAdaptor;
     this.authorizationUtil = new AuthorizationUtil(apiAdaptor);
   }
 
@@ -40,7 +43,7 @@ export class CapabilityUtil {
   };
   
   private validateCurrentUserCanTransitionIssue = async (accountId: string): Promise<ValidationResult> => {
-    const currentUser = await getCurrentUser(this.apiAdaptor, accountId);
+    const currentUser = await getCurrentUser(this.backendApiAdaptor, accountId);
     if (currentUser) {
       const isUserInAllowedList = await this.authorizationUtil.isUserInAllowList(currentUser, { key: currentUser.email });
       if (isUserInAllowedList) {
@@ -65,7 +68,7 @@ export class CapabilityUtil {
     const selfAssessmentData = await getSelfAssessmentData(this.apiAdaptor, issue.key);
     if (selfAssessmentData) {
       if (selfAssessmentData.selfAssessmentIssueLinkInfos.length > 0) {
-        console.log(`Found self assessment issues: ${JSON.stringify(selfAssessmentData.selfAssessmentIssueLinkInfos)}`);
+        // console.log(`Found self assessment issues: ${JSON.stringify(selfAssessmentData.selfAssessmentIssueLinkInfos)}`);
         for (const selfAssessmentIssueLinkInfo of selfAssessmentData.selfAssessmentIssueLinkInfos) {
           console.log(`Checking the status of self assessment issue ${selfAssessmentIssueLinkInfo.key}: ${selfAssessmentIssueLinkInfo.fields.status.name}`);
           if (selfAssessmentIssueLinkInfo.fields.status.name !== selfAssessmentDoneStatusName) {

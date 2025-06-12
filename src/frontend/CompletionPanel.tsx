@@ -20,6 +20,7 @@ import { SelfAssessmentData } from '../types/SelfAssessmentData';
 import { CapabilityWorkItem } from '../types/CapabilityWorkItem';
 import { CapabilityUtil } from '../shared/CapabilityUtil';
 import { IssueReference } from '../types/IssueReference';
+import resolverDelegatingApiAdaptor from './resolverDelegatingApiAdaptor';
 
 const CompletionPanel = () => {
   
@@ -35,11 +36,6 @@ const CompletionPanel = () => {
 
   const clearData = async () => {
     setLastUpdateTime(0);
-
-    // setValidationResult(undefined);
-    // setUsersWhoCanComplete([]);
-    // setTestCaseStats(undefined);
-
     setCapabilityWorkItem(undefined);
     setCurrentUser(undefined);
     setSelfAssessmentData(undefined);
@@ -50,15 +46,12 @@ const CompletionPanel = () => {
     const issueReference: IssueReference = {
       key: context.extension.issue.key
     }
-    const capabilityUtil = new CapabilityUtil(frontendApiAdaptor);
+    const capabilityUtil = new CapabilityUtil(frontendApiAdaptor, resolverDelegatingApiAdaptor);
     setLastUpdateTime(Date.now());
     const promises: Promise<any>[] = [
       capabilityUtil.allowIssueToBeResolved(issueReference, context.accountId).then(setValidationResult).then(),
-      // invoke('getUsersWhoCanComplete').then(setUsersWhoCanComplete),
-      // invoke('getTestCaseStats').then(setTestCaseStats),
-
       getCapabilityWorkItemByIssueKey(context.extension.issue.key).then(setCapabilityWorkItem),
-      getCurrentUser(frontendApiAdaptor, context.accountId).then(setCurrentUser),
+      getCurrentUser(resolverDelegatingApiAdaptor, context.accountId).then(setCurrentUser),
       getSelfAssessmentData(frontendApiAdaptor, context.extension.issue.key).then(setSelfAssessmentData),
     ];
     await Promise.all(promises);

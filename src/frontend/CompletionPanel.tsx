@@ -11,31 +11,55 @@ import ForgeReconciler, {
   Stack,
   Text,
 } from '@forge/react';
-import { invoke } from '@forge/bridge';
-import { ValidationResult } from 'src/types/ValidationResult';
-import { UserReference } from 'src/types/UserReference';
-import { TestCaseStats } from 'src/types/TestCaseStats';
+import { view } from '@forge/bridge';
+import { ValidationResult } from '../types/ValidationResult';
+import { UserReference } from '../types/UserReference';
+import { getCapabilityWorkItemByIssueKey, getCurrentUser, getSelfAssessmentData } from '../shared/capabilityDAO';
+import frontendApiAdaptor from './frontendApiAdaptor';
+import { SelfAssessmentData } from '../types/SelfAssessmentData';
+import { CapabilityWorkItem } from '../types/CapabilityWorkItem';
+import { CapabilityUtil } from '../shared/CapabilityUtil';
+import { IssueReference } from '../types/IssueReference';
 
-const App = () => {
+const CompletionPanel = () => {
   
   const [lastUpdateTime, setLastUpdateTime] = useState<number>(0);
   const [validationResult, setValidationResult] = useState<ValidationResult | undefined>(undefined);
-  const [usersWhoCanComplete, setUsersWhoCanComplete] = useState<UserReference[]>([]);
-  const [testCaseStats, setTestCaseStats] = useState<undefined |TestCaseStats>(undefined);
+
+  // const [usersWhoCanComplete, setUsersWhoCanComplete] = useState<UserReference[]>([]);
+  // const [testCaseStats, setTestCaseStats] = useState<undefined |TestCaseStats>(undefined);
+
+  const [capabilityWorkItem, setCapabilityWorkItem] = useState<undefined | CapabilityWorkItem>(undefined);
+  const [currentUser, setCurrentUser] = useState<undefined | UserReference>(undefined);
+  const [selfAssessmentData, setSelfAssessmentData] = useState<undefined | SelfAssessmentData>(undefined);
 
   const clearData = async () => {
     setLastUpdateTime(0);
-    setValidationResult(undefined);
-    setUsersWhoCanComplete([]);
-    setTestCaseStats(undefined);
+
+    // setValidationResult(undefined);
+    // setUsersWhoCanComplete([]);
+    // setTestCaseStats(undefined);
+
+    setCapabilityWorkItem(undefined);
+    setCurrentUser(undefined);
+    setSelfAssessmentData(undefined);
   }
 
   const retrieveData = async () => {
+    const context = await view.getContext();
+    const issueReference: IssueReference = {
+      key: context.extension.issue.key
+    }
+    const capabilityUtil = new CapabilityUtil(frontendApiAdaptor);
     setLastUpdateTime(Date.now());
     const promises: Promise<any>[] = [
-      invoke('getCompletionValidationInfo').then(setValidationResult).then(),
-      invoke('getUsersWhoCanComplete').then(setUsersWhoCanComplete),
-      invoke('getTestCaseStats').then(setTestCaseStats)
+      capabilityUtil.allowIssueToBeResolved(issueReference, context.accountId).then(setValidationResult).then(),
+      // invoke('getUsersWhoCanComplete').then(setUsersWhoCanComplete),
+      // invoke('getTestCaseStats').then(setTestCaseStats),
+
+      getCapabilityWorkItemByIssueKey(context.extension.issue.key).then(setCapabilityWorkItem),
+      getCurrentUser(frontendApiAdaptor, context.accountId).then(setCurrentUser),
+      getSelfAssessmentData(frontendApiAdaptor, context.extension.issue.key).then(setSelfAssessmentData),
     ];
     await Promise.all(promises);
   }
@@ -78,7 +102,15 @@ const App = () => {
   }
 
   const renderUsersWhoCanComplete = () => {
-    if (usersWhoCanComplete.length > 0) {
+    if (capabilityWorkItem) {
+      const usersWhoCanComplete: UserReference[] = [];
+      const strategic_plan_owners = capabilityWorkItem.strategic_plan_owners; // e.g. "Business Lead: Derrick.Ives2@T-Mobile.com;Tech Lead: John.Dougherty7@T-Mobile.com;Tech Lead: Chandrika.Adhikesavalu1@T-Mobile.com;Tech Lead: Cameron.Brauer@T-Mobile.com;Tech Lead: Urel.Djiogan1@T-Mobile.com;Tech Lead: Akshay.Dhagat1@T-Mobile.com;Tech Lead: Alex.Nguyen33@T-Mobile.com"
+      strategic_plan_owners.split(';').forEach(owner => {
+        const [name, email] = owner.split(':').map(part => part.trim());
+        usersWhoCanComplete.push({ name, email });
+      });
+
+
       return (
         <Stack space="space.0">
           <Text weight="semibold">
@@ -100,6 +132,9 @@ const App = () => {
   };
 
   const renderTestCaseStats = () => {
+    if (!capabilityWorkItem) {
+      return <Text>No test case stats available.</Text>;
+    }
     return (
       <Stack space="space.025">
         <Text weight="semibold">
@@ -111,25 +146,25 @@ const App = () => {
               <Text>
                 Total Pass
               </Text>
-              <Badge appearance="added">{testCaseStats.totalPass}</Badge>
+              <Badge appearance="added">{capabilityWorkItem.tests_passed}</Badge>
             </Inline>
             <Inline space="space.050" spread="space-between">
               <Text>
                 Total Blocked
               </Text>
-              <Badge appearance="important">{testCaseStats.totalBlocked}</Badge>
+              <Badge appearance="important">{capabilityWorkItem.tests_blocked}</Badge>
             </Inline>
             <Inline space="space.050" spread="space-between">
               <Text>
                 Total Deferred
               </Text>
-              <Badge appearance="removed">{testCaseStats.totalDeferred}</Badge>
+              <Badge appearance="removed">{capabilityWorkItem.tests_deferred}</Badge>
             </Inline>
             <Inline space="space.050" spread="space-between">
               <Text>
                 Total N/A
               </Text>
-              <Badge appearance="primary">{testCaseStats.totalNa}</Badge>
+              <Badge appearance="primary">{capabilityWorkItem.tests_not_applicable}</Badge>
             </Inline>
           </Stack>
           <Stack space="space.025">
@@ -137,25 +172,25 @@ const App = () => {
               <Text>
                 Total Failed
               </Text>
-              <Badge appearance="important">{testCaseStats.totalFailed}</Badge>
+              <Badge appearance="important">{capabilityWorkItem.tests_failed}</Badge>
             </Inline>
             <Inline space="space.050" spread="space-between">
               <Text>
                 Total To Be Reviewed
               </Text>
-              <Badge appearance="primary">{testCaseStats.totalToBeReviewed}</Badge>
+              <Badge appearance="primary">{capabilityWorkItem.tests_to_be_reviewed}</Badge>
             </Inline>
             <Inline space="space.050" spread="space-between">
               <Text>
                 Total Ready To Run
               </Text>
-              <Badge appearance="primary">{testCaseStats.totalReadyToRun}</Badge>
+              <Badge appearance="primary">{capabilityWorkItem.tests_ready_to_run}</Badge>
             </Inline>
             <Inline space="space.050" spread="space-between">
               <Text>
                 Total Others
               </Text>
-              <Badge appearance="primary">{testCaseStats.totalOthers}</Badge>
+              <Badge appearance="primary">{capabilityWorkItem.tests_other}</Badge>
             </Inline>
           </Stack>
           <Stack space="space.025">
@@ -163,19 +198,19 @@ const App = () => {
               <Text>
                 Total Dependent
               </Text>
-              <Badge appearance="primary">{testCaseStats.totalDependent}</Badge>
+              <Badge appearance="primary">{capabilityWorkItem.tests_dependent}</Badge>
             </Inline>
             <Inline space="space.050" spread="space-between">
               <Text>
                 Total Incomplete
               </Text>
-              <Badge appearance="primary">{testCaseStats.totalIncomplete}</Badge>
+              <Badge appearance="primary">{capabilityWorkItem.tests_incomplete}</Badge>
             </Inline>
             <Inline space="space.050" spread="space-between">
               <Text>
                 Total Unable to Test
               </Text>
-              <Badge appearance="removed">{testCaseStats.totalUnableToTest}</Badge>
+              <Badge appearance="removed">{capabilityWorkItem.test_unable_to_test}</Badge>
             </Inline>
           </Stack>
         </Inline>
@@ -201,7 +236,7 @@ const App = () => {
       <Stack space="space.150">
         <Text>{validationResult ? renderValidationResultAndToolbar(validationResult) : 'Validating...'}</Text>
         {validationResult && !validationResult.result ? renderUsersWhoCanComplete() : null}
-        {testCaseStats ? renderTestCaseStats() : null}
+        {capabilityWorkItem ? renderTestCaseStats() : null}
       </Stack>
     </Box>
   );
@@ -209,6 +244,6 @@ const App = () => {
 
 ForgeReconciler.render(
   <React.StrictMode>
-    <App />
+    <CompletionPanel />
   </React.StrictMode>
 );

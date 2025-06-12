@@ -3,7 +3,6 @@ import ForgeReconciler, { Text, Stack } from "@forge/react";
 import { view } from '@forge/bridge';
 import { CapabilityWorkItem } from '../types/CapabilityWorkItem';
 import { getCapabilityWorkItemByIssueKey } from '../shared/capabilityDAO';
-import frontendApiAdaptor from './frontendApiAdaptor';
 
 const CustomFieldView = () => {
 

@@ -12,9 +12,15 @@ An external database, mocked by invocations to https://dfds-mock.glitch.me/getCa
 
 The app must prevent CAP transitions from "In Progress" to "Resolved" if the current user is not authorized or if there are linked test cases that have not passed.
 
-## Architecture
+## Architecture and Imoplementation Overview
+
+The following diagrams provide a high level explaination of the architecture and implementation.
+
 
 ![images/architecture.png](images/architecture.png)
+
+
+![images/custom-field-sequence.png](images/custom-field-sequence.png)
 
 
 ![images/sequence-sharing-logic.png](images/sequence-sharing-logic.png)

@@ -1,4 +1,4 @@
-import { ValidationResult } from "./types/ValidationResult";
+import { ValidationResult } from "../types/ValidationResult";
 
 export class ValidationResultBuilder {
 

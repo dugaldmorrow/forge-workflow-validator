@@ -1,20 +1,20 @@
 modules:
   # https://developer.atlassian.com/platform/forge/manifest-reference/modules/scheduled-trigger/
-  scheduledTrigger:
-    - key: fetch-dfds-trigger
-      function: fn-fetch-dfds
-      interval: fiveMinute
-  trigger:
-    - key: on-issue-change
-      function: fn-on-issue-change
-      events:
-        - avi:jira:created:issue
-        - avi:jira:updated:issue
-        - avi:jira:deleted:issue
-      filter:
-        ignoreSelf: true
-        expression: event.issue.fields?.project?.key == 'FT'
-        onError: RECEIVE_AND_LOG
+  # scheduledTrigger:
+  #   - key: fetch-dfds-trigger
+  #     function: fn-fetch-dfds
+  #     interval: fiveMinute
+  # trigger:
+  #   - key: on-issue-change
+  #     function: fn-on-issue-change
+  #     events:
+  #       - avi:jira:created:issue
+  #       - avi:jira:updated:issue
+  #       - avi:jira:deleted:issue
+  #     filter:
+  #       ignoreSelf: true
+  #       expression: event.issue.fields?.project?.key == 'FT'
+  #       onError: RECEIVE_AND_LOG
   jira:issuePanel:
     - key: feature-completion-panel
       resource: completion-panel
@@ -25,25 +25,47 @@ modules:
       icon: https://developer.atlassian.com/platform/forge/images/icons/issue-panel-icon.svg
       displayConditions:
         and:
-          projectKey: FEAT
+          isAdmin: true # We decided users no longer need to see this panel, but we can still make is available for admins.
+          projectKey: CAP
           jiraExpression: issue.status.name != "Resolved"
+
+  # https://developer.atlassian.com/platform/forge/manifest-reference/modules/jira-custom-field
+  jira:customField:
+
+    # This is an example of a custom field that displays data that is sourced from an external service. This custom
+    # field is just displaying a single attribute of the CapabilityWorkItem record which is retrieved by calling
+    # the getCapabilityWorkItemByIssueKey function within capabilityDAO.ts.
+    - key: feature-test-case-status-custom-field
+      name: Feature Test Case Status
+      description: This fields displays feature test case status info.
+      type: string
+      readOnly: true # It does not make sense to allow this field to be edited.
+      view:
+        render: native
+        resource: tc-status-view-res
+        experience:
+          - issue-view
+
+
   jira:workflowValidator:
     - key: feature-completed-workflow-validator
       function: my-validator
       name: My Feature Completion Enforcer
       description: This Jira workflow validator ensures features are properly completed.
   function:
-    - key: fn-fetch-dfds
-      handler: trigger.onFetchDfdsData
-    - key: fn-on-issue-change
-      handler: trigger.onIssueChanged
+    # - key: fn-fetch-dfds
+    #   handler: index.onFetchDfdsData
+    # - key: fn-on-issue-change
+    #   handler: index.onIssueChanged
     - key: my-validator
-      handler: FeatureCompletionEnforcer.checkFeatureCompletion
+      handler: index.checkFeatureCompletion
     - key: fn-resolver
-      handler: resolver.handler
+      handler: index.handler
 resources:
+  - key: tc-status-view-res
+    path: src/frontend/TestCaseStatusCustomFieldView.tsx
   - key: completion-panel
-    path: src/frontend/index.tsx
+    path: src/frontend/CompletionPanel.tsx
 app:
   runtime:
     name: nodejs22.x
@@ -53,6 +75,10 @@ permissions:
     fetch:
       backend:
         - '*.glitch.me'
+        # Note the need to add the domain of the real backend service from which the data is being fetched.
+      client:
+        - '*.glitch.me'
+        # Note the need to add the domain of the real backend service from which the data is being fetched.
   scopes:
     - read:jira-work
     - read:email-address:jira
